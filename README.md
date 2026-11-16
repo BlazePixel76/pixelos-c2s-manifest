@@ -80,6 +80,7 @@ Back up your **EFS** (`efs`, `sec_efs`) before flashing anything. It holds the I
 - `hardware/lineage/generic-ims` added (required by the device tree, missing from the PixelOS manifest)
 - `hardware/samsung`: AdvancedDisplay uses a local `FileUtils`, and SamsungDoze uses a local `ScreenType`, so neither needs lineage-sdk
 - AdvancedDisplay shipped on c2s: Samsung mDNIe screen colour modes in Settings → Display
+- PixelOS flags (face unlock, call recording, 1440p boot animation) set before the vendor config is inherited
 
 ## Credits
 
