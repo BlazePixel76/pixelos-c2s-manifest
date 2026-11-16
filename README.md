@@ -25,15 +25,15 @@ Google's official AOSP requirements ([source.android.com](https://source.android
 | **Disk** | **400 GB free** | 250 GB for the source + 150 GB for the build, SSD strongly recommended |
 | **OS** | 64-bit Linux | WSL2 works if the hardware above is met |
 
-**Real-world testing with this tree:** Soong's analysis step for Android 17 peaked at **55+ GB of memory**. A 16 GB machine could not complete it, even with zram, a second zram device and SSD swap. **Treat 64 GB of RAM as the real minimum.**
+**From my own testing:** Soong's analysis step on Android 17 went past **55 GB of memory**. My 16 GB PC couldn't finish it, even with zram, a second zram device and swap on an SSD. So honestly, **64 GB of RAM is the real minimum** for this one.
 
 ## Access (private repos)
 
-These repositories are **private**. To build this port:
+These repos are **private**, so if you want to build this:
 
-1. **Ask me (BlazePixel76) for access** before trying to sync. A `repo sync` will fail without it.
-2. **Confirm your build machine meets the requirements above** (64 GB+ RAM, 400 GB+ free disk, 64-bit Linux). Please share your specs when you ask. Builds on weaker hardware fail at the analysis step.
-3. Once added as a collaborator, log in so git can reach the private repos:
+1. **Message me first** and I'll give you access. `repo sync` won't work until I do.
+2. **Tell me your build specs** so we can confirm they meet the requirements above (64 GB+ RAM, 400 GB+ free disk, 64-bit Linux). Anything weaker will most likely fail at the analysis step, so it saves us both time.
+3. Once you've got access, log in so git can pull the private repos:
 
 ```bash
 gh auth login
