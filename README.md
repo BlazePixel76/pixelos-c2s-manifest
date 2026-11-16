@@ -27,18 +27,13 @@ Google's official AOSP requirements ([source.android.com](https://source.android
 
 **From my own testing:** Soong's analysis step on Android 17 went past **55 GB of memory**. My 16 GB PC couldn't finish it, even with zram, a second zram device and swap on an SSD. So honestly, **64 GB of RAM is the real minimum** for this one.
 
-## Access (private repos)
+## Before you build
 
-These repos are **private**, so if you want to build this:
+All repos for this port are **public**, so anyone can sync and build it. A few things though:
 
-1. **Message me first** and I'll give you access. You can reach me on Telegram through the **Contacts** section on [my website](https://blazepixel76.github.io/BlazeWebsite/). `repo sync` won't work until I add you.
-2. **Tell me your build specs** so i can confirm they meet the requirements above (64 GB+ RAM, 400 GB+ free disk, 64-bit Linux). Anything weaker will most likely fail at the analysis step, so it saves us both time and our sanity :)
-3. Once you've got access, log in so git can pull the private repos:
-
-```bash
-gh auth login
-gh auth setup-git
-```
+1. **Check the hardware requirements above** (64 GB+ RAM, 400 GB+ free disk, 64-bit Linux). Anything weaker will most likely fail at the analysis step.
+2. **Please message me before releasing any builds publicly.** You can reach me on Telegram through the **Contacts** section on [my website](https://blazepixel76.github.io/BlazeWebsite/). I'd like to test builds on my own device first, and keep credits right.
+3. Found a bug or have a fix? Let me know there as well.
 
 ## Clone
 
