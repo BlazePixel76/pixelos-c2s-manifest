@@ -93,3 +93,6 @@ Back up your **EFS** (`efs`, `sec_efs`) before flashing anything. It holds the I
 This repository is licensed under the [Apache License 2.0](LICENSE).
 
 The device tree, hardware code, kernel and other projects pulled in by this manifest belong to their respective authors (mainly [LineageOS](https://github.com/LineageOS), [PixelOS](https://pixelos.net) and [TheMuppets](https://github.com/TheMuppets)) and are covered by their own licenses.
+
+## Reminder
+Please Do Not Try To Build This If You Have A Potato PC Or Lower Than 64 GB Ram Unless You Want Your PC To Suffer All Day But then You Have to Meet Hardware Requirments As Said In AOSP website
