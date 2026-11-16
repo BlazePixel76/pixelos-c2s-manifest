@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <remote name="los" fetch="https://github.com/LineageOS" revision="lineage-24.0" />
+  <remote name="muppets" fetch="https://github.com/TheMuppets" revision="lineage-24.0" />
+  <remote name="blaze" fetch="https://github.com/BlazePixel76" revision="pixelos-port" />
+  <project path="device/samsung/c2s" name="android_device_samsung_c2s" remote="blaze" />
+  <project path="hardware/samsung" name="android_hardware_samsung" remote="blaze" />
+
+  <!-- Device + common trees -->
+  <project path="device/samsung/c2s" name="android_device_samsung_c2s" remote="los" />
+  <project path="device/samsung/universal9830-common" name="android_device_samsung_universal9830-common" remote="los" />
+
+  <!-- universal9830-common dependencies -->
+  <project path="device/samsung_slsi/sepolicy" name="android_device_samsung_slsi_sepolicy" remote="los" />
+  <project path="hardware/samsung" name="android_hardware_samsung" remote="los" />
+  <project path="hardware/samsung_slsi/nfc" name="android_hardware_samsung_slsi_nfc" remote="los" />
+  <project path="hardware/samsung_slsi-linaro/config" name="android_hardware_samsung_slsi-linaro_config" remote="los" />
+  <project path="hardware/samsung_slsi-linaro/exynos" name="android_hardware_samsung_slsi-linaro_exynos" remote="los" />
+  <project path="hardware/samsung_slsi-linaro/exynos5" name="android_hardware_samsung_slsi-linaro_exynos5" remote="los" />
+  <project path="hardware/samsung_slsi-linaro/graphics" name="android_hardware_samsung_slsi-linaro_graphics" remote="los" />
+  <project path="hardware/samsung_slsi-linaro/interfaces" name="android_hardware_samsung_slsi-linaro_interfaces" remote="los" />
+  <project path="hardware/samsung_slsi-linaro/openmax" name="android_hardware_samsung_slsi-linaro_openmax" remote="los" />
+
+  <!-- Kernel (LineageOS for the first build; we swap in BakaKrnl later) -->
+  <project path="kernel/samsung/universal9830" name="android_kernel_samsung_universal9830" remote="los" clone-depth="1" />
+
+  <!-- Proprietary blobs -->
+  <project path="vendor/samsung/c2s" name="proprietary_vendor_samsung_c2s" remote="muppets" />
+  <project path="vendor/samsung/universal9830-common" name="proprietary_vendor_samsung_universal9830-common" remote="muppets" />
+  <!-- Missing from PixelOS manifest -->
+  <project path="hardware/lineage/generic-ims" name="android_hardware_lineage_generic-ims" remote="los" />
+</manifest>
