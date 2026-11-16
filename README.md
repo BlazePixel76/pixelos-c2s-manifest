@@ -85,3 +85,11 @@ Back up your **EFS** (`efs`, `sec_efs`) before flashing anything. It holds the I
 - [LineageOS](https://github.com/LineageOS): device, common, kernel and hardware trees
 - [PixelOS](https://pixelos.net): the ROM
 - [TheMuppets](https://github.com/TheMuppets): proprietary vendor blobs
+
+## License
+
+Copyright (C) 2026 BlazePixel76
+
+This repository is licensed under the [Apache License 2.0](LICENSE).
+
+The device tree, hardware code, kernel and other projects pulled in by this manifest belong to their respective authors (mainly [LineageOS](https://github.com/LineageOS), [PixelOS](https://pixelos.net) and [TheMuppets](https://github.com/TheMuppets)) and are covered by their own licenses.
