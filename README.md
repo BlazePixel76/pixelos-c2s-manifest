@@ -88,7 +88,7 @@ Back up your **EFS** (`efs`, `sec_efs`) before flashing anything. It holds the I
 
 ## License
 
-Copyright (C) 2026 BlazePixel76
+**Copyright © 2026 BlazePixel76**
 
 This repository is licensed under the [Apache License 2.0](LICENSE).
 
