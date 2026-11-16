@@ -31,7 +31,7 @@ Google's official AOSP requirements ([source.android.com](https://source.android
 
 These repos are **private**, so if you want to build this:
 
-1. **Message me first** and I'll give you access. `repo sync` won't work until I do.
+1. **Message me first** and I'll give you access. You can reach me on Telegram through the **Contacts** section on [my website](https://blazepixel76.github.io/BlazeWebsite/). `repo sync` won't work until I add you.
 2. **Tell me your build specs** so we can confirm they meet the requirements above (64 GB+ RAM, 400 GB+ free disk, 64-bit Linux). Anything weaker will most likely fail at the analysis step, so it saves us both time.
 3. Once you've got access, log in so git can pull the private repos:
 
