@@ -46,6 +46,26 @@ cp /tmp/c2s-manifest/c2s.xml .repo/local_manifests/
 repo sync -c -j8 --force-sync --no-clone-bundle --no-tags
 ```
 
+## Patches
+
+Some fixes live outside the device repos, so they're included here as patch files in [`patches/`](patches/). Apply them after `repo sync` and before building:
+
+```bash
+# Required: boot animation resolution fix
+# (the N20U's display HAL can't remember a boot resolution, so without this the boot
+#  animation glitches into a corner when you're using 1080p)
+git -C frameworks/base   am ../pixelos-c2s-manifest/patches/0001-display-Persist-preferred-resolution-for-HWCs-withou.patch
+git -C frameworks/native am ../pixelos-c2s-manifest/patches/0001-surfaceflinger-Restore-preferred-resolution-at-boot-.patch
+
+# Optional: only for low-RAM build machines (around 16 GB)
+# Makes Soong's analysis step use much less memory, at the cost of extra CPU time.
+# Not needed if you have 64 GB+ RAM.
+git -C build/soong am ../pixelos-c2s-manifest/patches/0001-LOCAL-Lower-soong_build-GC-target-for-16-GB-machines.patch
+git -C build/soong am ../pixelos-c2s-manifest/patches/0002-LOCAL-Raise-soong_build-soft-memory-limit-to-32-GiB.patch
+```
+
+The paths above assume you cloned this repo next to your source folder. Adjust them if yours is somewhere else.
+
 ## Build
 
 ```bash
