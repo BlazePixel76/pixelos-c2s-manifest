@@ -1,0 +1,35 @@
+From 500854d84b0fc7fb0c37a4951ae1902935dea279 Mon Sep 17 00:00:00 2001
+From: BlazePixel76 <257001823+BlazePixel76@users.noreply.github.com>
+Date: Tue, 17 Nov 2026 08:07:10 +0300
+Subject: [PATCH 1/2] LOCAL: Lower soong_build GC target for 16 GB machines
+
+Change-Id: I677621922f84cf29ac99ddd9f2d40405ccc2e31e
+---
+ cmd/soong_build/main.go | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/cmd/soong_build/main.go b/cmd/soong_build/main.go
+index 335d3d8..b1b3af4 100644
+--- a/cmd/soong_build/main.go
++++ b/cmd/soong_build/main.go
+@@ -15,6 +15,7 @@
+ package main
+ 
+ import (
++	"runtime/debug"
+ 	"encoding/json"
+ 	"errors"
+ 	"flag"
+@@ -314,6 +315,9 @@ func parseAvailableEnv() map[string]string {
+ }
+ 
+ func main() {
++	// Local low-memory tweak: collect garbage earlier and aim for a soft heap cap.
++	debug.SetGCPercent(50)
++	debug.SetMemoryLimit(26 << 30) // 26 GiB soft limit
+ 	flag.Parse()
+ 
+ 	if cmdlineArgs.Memprofile == "" {
+-- 
+2.56.1
+

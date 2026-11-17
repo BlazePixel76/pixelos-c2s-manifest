@@ -1,0 +1,83 @@
+From 1315700cb4e9fb56108302037306bfb759a865c9 Mon Sep 17 00:00:00 2001
+From: BlazePixel76 <257001823+BlazePixel76@users.noreply.github.com>
+Date: Tue, 17 Nov 2026 13:03:52 +0300
+Subject: [PATCH] surfaceflinger: Restore preferred resolution at boot without
+ HWC boot mode support
+
+Change-Id: Id80e0dc5e01d29a71390c65c440f54594e7a860f
+---
+ services/surfaceflinger/SurfaceFlinger.cpp | 51 ++++++++++++++++++++++
+ 1 file changed, 51 insertions(+)
+
+diff --git a/services/surfaceflinger/SurfaceFlinger.cpp b/services/surfaceflinger/SurfaceFlinger.cpp
+index 6b36a85..bce9520 100644
+--- a/services/surfaceflinger/SurfaceFlinger.cpp
++++ b/services/surfaceflinger/SurfaceFlinger.cpp
+@@ -29,6 +29,7 @@
+ #include <android-base/logging.h>
+ #include <android-base/parseint.h>
+ #include <android-base/properties.h>
++#include <cstdio>
+ #include <android-base/stringprintf.h>
+ #include <android-base/strings.h>
+ #include <android/configuration.h>
+@@ -4181,6 +4182,56 @@ std::pair<DisplayModes, DisplayModePtr> SurfaceFlinger::loadDisplayModes(
+         return {};
+     }
+ 
++    // On HWCs that cannot persist a boot display mode (e.g. HIDL composer 2.x), the bootloader
++    // always leaves the panel in its native mode. Restore the user's preferred resolution here,
++    // before the display device is created and before the boot animation starts, so the boot
++    // animation is laid out at the final resolution from its first frame.
++    if (!isExternalDisplay && !mBootFinished && activeModeHwcIdOpt) {
++        const std::string pref = base::GetProperty("persist.sys.sf.boot_display_mode"s, ""s);
++        int prefWidth = 0;
++        int prefHeight = 0;
++        if (!pref.empty() && std::sscanf(pref.c_str(), "%dx%d", &prefWidth, &prefHeight) == 2) {
++            const auto current = std::find_if(hwcModes.begin(), hwcModes.end(),
++                                              [&](const auto& mode) {
++                                                  return mode.hwcId == *activeModeHwcIdOpt;
++                                              });
++            if (current != hwcModes.end() &&
++                (current->width != prefWidth || current->height != prefHeight)) {
++                // Prefer the same refresh rate as the current mode, otherwise any match.
++                auto target = std::find_if(hwcModes.begin(), hwcModes.end(),
++                                           [&](const auto& mode) {
++                                               return mode.width == prefWidth &&
++                                                       mode.height == prefHeight &&
++                                                       mode.vsyncPeriod == current->vsyncPeriod;
++                                           });
++                if (target == hwcModes.end()) {
++                    target = std::find_if(hwcModes.begin(), hwcModes.end(),
++                                          [&](const auto& mode) {
++                                              return mode.width == prefWidth &&
++                                                      mode.height == prefHeight;
++                                          });
++                }
++                if (target != hwcModes.end()) {
++                    hal::VsyncPeriodChangeConstraints constraints;
++                    constraints.desiredTimeNanos = systemTime();
++                    constraints.seamlessRequired = false;
++                    hal::VsyncPeriodChangeTimeline timeline;
++                    const status_t err =
++                            getHwComposer().setActiveModeWithConstraints(displayId, target->hwcId,
++                                                                         constraints, &timeline);
++                    if (err == NO_ERROR) {
++                        ALOGI("Restored boot display mode %dx%d for display %s", prefWidth,
++                              prefHeight, to_string(displayId).c_str());
++                        activeModeHwcIdOpt = target->hwcId;
++                    } else {
++                        ALOGW("Failed to restore boot display mode %dx%d: %d", prefWidth,
++                              prefHeight, err);
++                    }
++                }
++            }
++        }
++    }
++
+     const DisplayModes oldModes = mPhysicalDisplays.get(displayId)
+                                           .transform([](const PhysicalDisplay& display) {
+                                               return display.snapshot().displayModes();
+-- 
+2.56.1
+

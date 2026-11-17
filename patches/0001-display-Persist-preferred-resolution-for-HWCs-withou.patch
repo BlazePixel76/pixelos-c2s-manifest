@@ -1,0 +1,60 @@
+From 00d9f13f088ae2f62a92539904fee3eb9a5604b0 Mon Sep 17 00:00:00 2001
+From: BlazePixel76 <257001823+BlazePixel76@users.noreply.github.com>
+Date: Tue, 17 Nov 2026 13:03:02 +0300
+Subject: [PATCH] display: Persist preferred resolution for HWCs without boot
+ display mode support
+
+Change-Id: I838028694b05dbcd0f739b68ecbefbc0f1c58561
+---
+ .../server/display/LocalDisplayAdapter.java   | 21 +++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/services/core/java/com/android/server/display/LocalDisplayAdapter.java b/services/core/java/com/android/server/display/LocalDisplayAdapter.java
+index ae8e01484..838ea5a72 100644
+--- a/services/core/java/com/android/server/display/LocalDisplayAdapter.java
++++ b/services/core/java/com/android/server/display/LocalDisplayAdapter.java
+@@ -90,6 +90,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
+ 
+     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.boot.emulator.circular";
+ 
++    // Fallback for HWCs that cannot persist a boot display mode (e.g. HIDL composer 2.x):
++    // SurfaceFlinger reads this early at boot to restore the user's preferred resolution.
++    private static final String PROPERTY_BOOT_DISPLAY_MODE = "persist.sys.sf.boot_display_mode";
++
+     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
+ 
+     private final Injector mInjector;
+@@ -1171,6 +1175,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
+ 
+             if (mIsBootDisplayModeSupported) {
+                 updateBootDisplayMode();
++            } else if (mIsFirstDisplay) {
++                updateBootDisplayModeProperty();
+             }
+             return true;
+         }
+@@ -1387,6 +1393,21 @@ final class LocalDisplayAdapter extends DisplayAdapter {
+             mSurfaceControlProxy.setGameContentType(getDisplayTokenLocked(), on);
+         }
+ 
++        private void updateBootDisplayModeProperty() {
++            String value = "";
++            if (mUserPreferredModeId != INVALID_MODE_ID && mUserPreferredMode != null
++                    && mUserPreferredMode.getPhysicalWidth() > 0
++                    && mUserPreferredMode.getPhysicalHeight() > 0) {
++                value = mUserPreferredMode.getPhysicalWidth() + "x"
++                        + mUserPreferredMode.getPhysicalHeight();
++            }
++            try {
++                SystemProperties.set(PROPERTY_BOOT_DISPLAY_MODE, value);
++            } catch (RuntimeException e) {
++                Slog.w(TAG, "Failed to persist boot display mode", e);
++            }
++        }
++
+         private void updateBootDisplayMode() {
+             if (mUserPreferredModeId == INVALID_MODE_ID) {
+                 mSurfaceControlProxy.clearBootDisplayMode(getDisplayTokenLocked());
+-- 
+2.56.1
+

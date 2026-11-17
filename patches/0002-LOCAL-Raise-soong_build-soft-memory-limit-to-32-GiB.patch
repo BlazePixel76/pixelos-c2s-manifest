@@ -1,0 +1,26 @@
+From 8af544b08631337af1de154477e9e74e04c34cb3 Mon Sep 17 00:00:00 2001
+From: BlazePixel76 <257001823+BlazePixel76@users.noreply.github.com>
+Date: Tue, 17 Nov 2026 10:16:49 +0300
+Subject: [PATCH 2/2] LOCAL: Raise soong_build soft memory limit to 32 GiB
+
+Change-Id: Id2e3ba72246df7086f5b2f75df22233079dc01e4
+---
+ cmd/soong_build/main.go | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmd/soong_build/main.go b/cmd/soong_build/main.go
+index b1b3af4..e8ce6cb 100644
+--- a/cmd/soong_build/main.go
++++ b/cmd/soong_build/main.go
+@@ -317,7 +317,7 @@ func parseAvailableEnv() map[string]string {
+ func main() {
+ 	// Local low-memory tweak: collect garbage earlier and aim for a soft heap cap.
+ 	debug.SetGCPercent(50)
+-	debug.SetMemoryLimit(26 << 30) // 26 GiB soft limit
++	debug.SetMemoryLimit(32 << 30) // 32 GiB soft limit
+ 	flag.Parse()
+ 
+ 	if cmdlineArgs.Memprofile == "" {
+-- 
+2.56.1
+
