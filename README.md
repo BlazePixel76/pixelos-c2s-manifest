@@ -2,8 +2,6 @@
 
 Unofficial PixelOS (Android 17) port for the **Samsung Galaxy Note 20 Ultra, Exynos (SM-N986B, codename `c2s`)**, based on the LineageOS 24 device tree.
 
-> **Status: work in progress.** The tree syncs, converts and passes Soong's dependency checks, but a full build has not completed yet (see *Hardware requirements*).
-
 ## Repositories
 
 | Repository | Purpose |
@@ -32,8 +30,7 @@ Google's official AOSP requirements ([source.android.com](https://source.android
 All repos for this port are **public**, so anyone can sync and build it. A few things though:
 
 1. **Check the hardware requirements above** (64 GB+ RAM, 400 GB+ free disk, 64-bit Linux). Anything weaker will most likely fail at the analysis step.
-2. **Please message me before releasing any builds publicly.** You can reach me on Telegram through the **Contacts** section on [my website](https://blazepixel76.github.io/BlazeWebsite/). I'd like to test builds on my own device first, and keep credits right.
-3. Found a bug or have a fix? Let me know there as well.
+2. Just Make Sure Your Not Building On An HDD As The Days It Took to Build This Rom Was 3 - 4 Days.
 
 ## Clone
 
@@ -116,4 +113,6 @@ This repository is licensed under the [Apache License 2.0](LICENSE).
 The device tree, hardware code, kernel and other projects pulled in by this manifest belong to their respective authors (mainly [LineageOS](https://github.com/LineageOS), [PixelOS](https://pixelos.net) and [TheMuppets](https://github.com/TheMuppets)) and are covered by their own licenses.
 
 ## Reminder
-Please Do Not Try To Build This If You Have A Potato PC Or Lower Than 64 GB Ram Unless You Want Your PC To Suffer All Day But then You Have to Meet Hardware Requirments As Said In AOSP website
+- Please Do Not Try To Build This If You Have A Potato PC Or Lower Than 64 GB Ram Unless You Want Your PC To Suffer All Day But then You Have to Meet Hardware Requirments As Said In AOSP website.
+
+- Also PixelOS Downloads for c2s Will Be Hosted On My SourceForge In A Bit As Im Setting it up and confirming with my release-keys.
