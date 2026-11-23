@@ -1,38 +1,37 @@
-# PixelOS for Samsung Galaxy Note 20 Ultra (c2s)
+# PixelOS for Galaxy Note 20 Ultra (c2s)
 
-Unofficial PixelOS (Android 17) port for the **Samsung Galaxy Note 20 Ultra, Exynos (SM-N986B, codename `c2s`)**, based on the LineageOS 24 device tree.
+Unofficial PixelOS (Android 17) for the Galaxy Note 20 Ultra Exynos (SM-N986B, `c2s`), based on the LineageOS 24 device tree.
 
-## Repositories
+## Downloads
 
-| Repository | Purpose |
+Latest build: [Releases](https://github.com/BlazePixel76/pixelos-c2s-manifest/releases/latest) (ROM zip is on [Gofile](https://gofile.io/d/RFSln38u), recovery is attached to the release)
+
+Optional root kernel: [BakaKrnl](https://github.com/BlazePixel76/BakaKrnl-c2s)
+
+## Installing
+
+1. Back up your data and EFS first (`efs`, `sec_efs`, it has your IMEI).
+2. Flash the PixelOS recovery from the release (Odin AP with the .tar, or the .img).
+3. Reboot to recovery, format data (only needed when coming from another ROM).
+4. Apply update, pick the ROM zip, reboot.
+
+Builds are signed with my own keys, so you need my recovery for updates to install without a signature warning.
+
+## Repos
+
+| Repo | What it is |
 |---|---|
-| `pixelos-c2s-manifest` | This repo: the local manifest that ties everything together |
-| `android_device_samsung_c2s` (branch `pixelos-port`) | Device tree converted from LineageOS to PixelOS |
-| `android_hardware_samsung` (branch `pixelos-port`) | Samsung hardware repo with the lineage-sdk dependency removed from AdvancedDisplay and SamsungDoze |
+| `pixelos-c2s-manifest` | This repo, the local manifest |
+| [`android_device_samsung_c2s`](https://github.com/BlazePixel76/android_device_samsung_c2s) (`pixelos-port`) | Device tree, converted from LineageOS to PixelOS |
+| [`android_hardware_samsung`](https://github.com/BlazePixel76/android_hardware_samsung) (`pixelos-port`) | Samsung hardware repo, AdvancedDisplay and SamsungDoze without lineage-sdk |
 
-All other projects (common tree, kernel, vendor blobs, Samsung SLSI HALs) come from **LineageOS** (`lineage-24.0`) and **TheMuppets**.
+Everything else (common tree, kernel, SLSI HALs, vendor blobs) comes from LineageOS and TheMuppets (`lineage-24.0`).
 
-## Hardware requirements
+## Building
 
-Google's official AOSP requirements ([source.android.com](https://source.android.com/docs/setup/start/requirements)):
+You'll need a lot of RAM and disk space. Google recommends 64 GB RAM and 400 GB free disk. I built this on 16 GB RAM with the Soong patches below, zram and swap, and it worked, but analysis alone eats way more memory than you have. Also don't build on an HDD unless you're fine waiting days (mine took 3 to 4).
 
-| | Minimum | Notes |
-|---|---|---|
-| **CPU** | 64-bit x86 | More cores = faster compiling |
-| **RAM** | **64 GB** | Google builds Android on 72-core machines with 64 GB RAM |
-| **Disk** | **400 GB free** | 250 GB for the source + 150 GB for the build, SSD strongly recommended |
-| **OS** | 64-bit Linux | WSL2 works if the hardware above is met |
-
-**From my own testing:** Soong's analysis step on Android 17 went past **55 GB of memory**. My 16 GB PC couldn't finish it, even with zram, a second zram device and swap on an SSD. So honestly, **64 GB of RAM is the real minimum** for this one.
-
-## Before you build
-
-All repos for this port are **public**, so anyone can sync and build it. A few things though:
-
-1. **Check the hardware requirements above** (64 GB+ RAM, 400 GB+ free disk, 64-bit Linux). Anything weaker will most likely fail at the analysis step.
-2. Just Make Sure Your Not Building On An HDD As The Days It Took to Build This Rom Was 3 - 4 Days.
-
-## Clone
+### Sync
 
 ```bash
 mkdir pixelos && cd pixelos
@@ -43,31 +42,26 @@ cp /tmp/c2s-manifest/c2s.xml .repo/local_manifests/
 repo sync -c -j8 --force-sync --no-clone-bundle --no-tags
 ```
 
-## Patches
+If the build fails with "presigned apk" errors, the GMS files are still LFS pointers. Run `git lfs pull` inside `vendor/pixel/gms`.
 
-Some fixes live outside the device repos, so they're included here as patch files in [`patches/`](patches/). Apply them after `repo sync` and before building:
+### Patches
+
+Apply these after syncing, from the root of the source folder:
 
 ```bash
-# Run these from the root of your PixelOS source folder.
-# Points at the copy of this repo from the Clone step above.
 PATCHES=/tmp/c2s-manifest/patches
 
-# Required: boot animation resolution fix
-# (the N20U's display HAL can't remember a boot resolution, so without this the boot
-#  animation glitches into a corner when you're using 1080p)
+# Required: fixes the boot animation glitching into a corner at 1080p
+# (the display HAL doesn't remember the boot resolution)
 git -C frameworks/base   am "$PATCHES"/0001-display-Persist-preferred-resolution-for-HWCs-withou.patch
 git -C frameworks/native am "$PATCHES"/0001-surfaceflinger-Restore-preferred-resolution-at-boot-.patch
 
-# Optional: only for low-RAM build machines (around 16 GB)
-# Makes Soong's analysis step use much less memory, at the cost of extra CPU time.
-# Not needed if you have 64 GB+ RAM.
+# Optional: only for ~16 GB RAM machines, makes Soong analysis use less memory
 git -C build/soong am "$PATCHES"/0001-LOCAL-Lower-soong_build-GC-target-for-16-GB-machines.patch
 git -C build/soong am "$PATCHES"/0002-LOCAL-Raise-soong_build-soft-memory-limit-to-32-GiB.patch
 ```
 
-If you cloned this repo somewhere other than `/tmp/c2s-manifest`, change `PATCHES` to match.
-
-## Build
+### Build
 
 ```bash
 source build/envsetup.sh
@@ -75,44 +69,24 @@ breakfast c2s
 m pixelos -j$(nproc)
 ```
 
-The flashable zip is written to `out/target/product/c2s/PixelOS_*.zip`.
-
-**Low-RAM machines:** lower `-j` (for example `-j6`), and use zram plus swap on an SSD. Never put swap on an HDD.
-
-## Flashing
-
-This device is usually flashed from **recovery** (for example Lineage Recovery):
-
-1. Copy the zip to the SD card.
-2. Recovery → **Apply update** → choose the zip.
-3. Format data when coming from a different ROM.
-
-Back up your **EFS** (`efs`, `sec_efs`) before flashing anything. It holds the IMEI.
+The zip ends up in `out/target/product/c2s/`. On low-RAM machines use a lower `-j` (like `-j6`) and zram plus swap on an SSD.
 
 ## Changes from LineageOS
 
-- `lineage_c2s.mk` → `custom_c2s.mk`, inheriting `vendor/custom/config/common_full_phone.mk`
-- PixelOS flags: `TARGET_FACE_UNLOCK_SUPPORTED`, `TARGET_CALL_RECORDING_SUPPORTED`
-- `hardware/lineage/generic-ims` added (required by the device tree, missing from the PixelOS manifest)
-- `hardware/samsung`: AdvancedDisplay uses a local `FileUtils`, and SamsungDoze uses a local `ScreenType`, so neither needs lineage-sdk
-- AdvancedDisplay shipped on c2s: Samsung mDNIe screen colour modes in Settings → Display
-- PixelOS flags (face unlock, call recording, 1440p boot animation) set before the vendor config is inherited
+- `lineage_c2s.mk` renamed to `custom_c2s.mk`, inheriting `vendor/custom/config/common_full_phone.mk`
+- PixelOS flags (face unlock, call recording, 1440p boot animation) set before the vendor config
+- Added `hardware/lineage/generic-ims` (needed by the device tree, missing from the PixelOS manifest)
+- `hardware/samsung`: local `FileUtils` for AdvancedDisplay and local `ScreenType` for SamsungDoze, so neither needs lineage-sdk
+- AdvancedDisplay included, so mDNIe colour modes show up in Settings > Display
 
 ## Credits
 
-- [LineageOS](https://github.com/LineageOS): device, common, kernel and hardware trees
-- [PixelOS](https://pixelos.net): the ROM
-- [TheMuppets](https://github.com/TheMuppets): proprietary vendor blobs
+- [LineageOS](https://github.com/LineageOS) for the device, common, kernel and hardware trees
+- [PixelOS](https://pixelos.net) for the ROM
+- [TheMuppets](https://github.com/TheMuppets) for the vendor blobs
 
 ## License
 
-**Copyright © 2026 BlazePixel76**
+Copyright © 2026 BlazePixel76
 
-This repository is licensed under the [Apache License 2.0](LICENSE).
-
-The device tree, hardware code, kernel and other projects pulled in by this manifest belong to their respective authors (mainly [LineageOS](https://github.com/LineageOS), [PixelOS](https://pixelos.net) and [TheMuppets](https://github.com/TheMuppets)) and are covered by their own licenses.
-
-## Reminder
-- Please Do Not Try To Build This If You Have A Potato PC Or Lower Than 64 GB Ram Unless You Want Your PC To Suffer All Day But then You Have to Meet Hardware Requirments As Said In AOSP website.
-
-- Also PixelOS Downloads for c2s Will Be Hosted On My GoFile (Released :)).
+This repo is under the [Apache License 2.0](LICENSE). Everything the manifest pulls in belongs to its authors (mainly LineageOS, PixelOS and TheMuppets) and has its own license.
