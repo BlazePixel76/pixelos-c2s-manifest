@@ -115,4 +115,4 @@ The device tree, hardware code, kernel and other projects pulled in by this mani
 ## Reminder
 - Please Do Not Try To Build This If You Have A Potato PC Or Lower Than 64 GB Ram Unless You Want Your PC To Suffer All Day But then You Have to Meet Hardware Requirments As Said In AOSP website.
 
-- Also PixelOS Downloads for c2s Will Be Hosted On My SourceForge In A Bit As Im Setting it up and confirming with my release-keys.
+- Also PixelOS Downloads for c2s Will Be Hosted On My GoFile (Released :)).
