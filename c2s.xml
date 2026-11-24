@@ -19,7 +19,7 @@
   <project path="hardware/samsung_slsi-linaro/interfaces" name="android_hardware_samsung_slsi-linaro_interfaces" remote="los" />
   <project path="hardware/samsung_slsi-linaro/openmax" name="android_hardware_samsung_slsi-linaro_openmax" remote="los" />
 
-  <!-- Kernel (LineageOS for the first build; we swap in BakaKrnl later) -->
+  <!-- Kernel -->
   <project path="kernel/samsung/universal9830" name="android_kernel_samsung_universal9830" remote="los" clone-depth="1" />
 
   <!-- Proprietary blobs -->
