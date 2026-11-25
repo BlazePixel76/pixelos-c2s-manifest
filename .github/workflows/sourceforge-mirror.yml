@@ -1,0 +1,82 @@
+name: Mirror to SourceForge
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (e.g. 20261122)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      SF_USER: blazepixel
+      SF_PROJECT: pixelos-c2s
+      ANDROID_VER: "17.0"
+    steps:
+      - name: Download release files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir files && cd files
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY"
+          ls -l
+
+      - name: Join split ROM
+        working-directory: files
+        run: |
+          for first in *.zip.part00; do
+            [ -e "$first" ] || continue
+            zip="${first%.part00}"
+            cat "$zip".part* > "$zip"
+            rm "$zip".part*
+            echo "Joined $zip"
+          done
+          ls -l
+
+      - name: Check md5
+        working-directory: files
+        run: |
+          ls *.zip > /dev/null
+          md5sum -c --ignore-missing md5sums.txt
+
+      - name: Set up SSH
+        env:
+          SF_SSH_KEY: ${{ secrets.SF_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SF_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -t ed25519 frs.sourceforge.net > /tmp/sf_host 2>/dev/null
+          fp=$(ssh-keygen -lf /tmp/sf_host | awk '{print $2}')
+          if [ "$fp" != "SHA256:209BDmH3jsRyO9UeGPPgLWPSegKmYCBIya0nR/AWWCY" ]; then
+            echo "SourceForge host key mismatch: $fp"
+            exit 1
+          fi
+          cat /tmp/sf_host >> ~/.ssh/known_hosts
+
+      - name: Upload to SourceForge
+        working-directory: files
+        run: |
+          BASE="/home/frs/project/$SF_PROJECT"
+          DEST="$BASE/$ANDROID_VER/$TAG"
+          printf -- '-mkdir %s\n-mkdir %s\n' "$BASE/$ANDROID_VER" "$DEST" \
+            | sftp -b - "$SF_USER@frs.sourceforge.net"
+          rsync -av --progress ./ "$SF_USER@frs.sourceforge.net:$DEST/"
+
+      - name: Remove split parts from GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets -q '.assets[].name' \
+            | grep '\.part[0-9][0-9]$' \
+            | while read -r part; do
+                gh release delete-asset "$TAG" "$part" --repo "$GITHUB_REPOSITORY" -y
+              done
