@@ -1,0 +1,76 @@
+From 39bfeb7d224a25943976103be238a2ad53ef9db9 Mon Sep 17 00:00:00 2001
+From: BlazePixel76 <257001823+BlazePixel76@users.noreply.github.com>
+Date: Fri, 27 Nov 2026 19:05:00 +0300
+Subject: [PATCH] Settings: Hide hotspot WPA3 options when SAE isn't supported
+
+The new hotspot security page only restricts security types by speed
+type. For 2.4/5 GHz it leaves the allowlist empty, which enables every
+type, including WPA3 and WPA2/WPA3, even when SoftApCapability lacks
+SOFTAP_FEATURE_WPA3_SAE. Picking them then fails to start the hotspot.
+
+Track SOFTAP_FEATURE_WPA3_SAE in WifiHotspotRepository and disable the
+WPA3 types in WifiHotspotSecurityViewModel when it isn't supported. The
+old WifiTetherSecurityPreferenceController already checked this.
+---
+ .../wifi/repository/WifiHotspotRepository.java | 18 ++++++++++++++++++
+ .../tether/WifiHotspotSecurityViewModel.java   |  7 +++++++
+ 2 files changed, 25 insertions(+)
+
+diff --git a/src/com/android/settings/wifi/repository/WifiHotspotRepository.java b/src/com/android/settings/wifi/repository/WifiHotspotRepository.java
+index 00884a5..75f5ded 100644
+--- a/src/com/android/settings/wifi/repository/WifiHotspotRepository.java
++++ b/src/com/android/settings/wifi/repository/WifiHotspotRepository.java
+@@ -633,6 +633,16 @@
+         mTetheringManager.stopTethering(TETHERING_WIFI);
+     }
+ 
++    // Assume WPA3-SAE is supported until SoftApCapability says otherwise.
++    private boolean mIsWpa3SaeSupported = true;
++
++    /**
++     * Returns whether the device supports WPA3-SAE for the Wi-Fi hotspot.
++     */
++    public boolean isWpa3SaeSupported() {
++        return mIsWpa3SaeSupported;
++    }
++
+     @VisibleForTesting
+     void updateCapabilityChanged() {
+         if (mBand5g.isChannelsUnsupported) {
+@@ -674,7 +684,15 @@
+             log("onCapabilityChanged(), softApCapability:" + softApCapability);
+             mBand5g.hasCapability = softApCapability.getSupportedChannelList(BAND_5GHZ).length > 0;
+             mBand6g.hasCapability = softApCapability.getSupportedChannelList(BAND_6GHZ).length > 0;
++            final boolean wpa3SaeSupported = softApCapability.areFeaturesSupported(
++                    SoftApCapability.SOFTAP_FEATURE_WPA3_SAE);
++            final boolean wpa3SaeChanged = wpa3SaeSupported != mIsWpa3SaeSupported;
++            mIsWpa3SaeSupported = wpa3SaeSupported;
+             updateCapabilityChanged();
++            if (wpa3SaeChanged) {
++                // Re-send the speed type so the security page refreshes its options.
++                updateSpeedType();
++            }
+         }
+     }
+ 
+diff --git a/src/com/android/settings/wifi/tether/WifiHotspotSecurityViewModel.java b/src/com/android/settings/wifi/tether/WifiHotspotSecurityViewModel.java
+index 2fff22d..76e4613 100644
+--- a/src/com/android/settings/wifi/tether/WifiHotspotSecurityViewModel.java
++++ b/src/com/android/settings/wifi/tether/WifiHotspotSecurityViewModel.java
+@@ -109,6 +109,13 @@
+ 
+             viewItem.mIsEnabled = allowedSecurityTypes.isEmpty()
+                     || allowedSecurityTypes.contains(securityType);
++
++            // Don't offer WPA3 types if the hotspot can't do WPA3-SAE.
++            if (!mWifiHotspotRepository.isWpa3SaeSupported()
++                    && (securityType == SECURITY_TYPE_WPA3_SAE
++                    || securityType == SECURITY_TYPE_WPA3_SAE_TRANSITION)) {
++                viewItem.mIsEnabled = false;
++            }
+         }
+ 
+         updateViewItemListData();
+-- 
+2.43.0
+

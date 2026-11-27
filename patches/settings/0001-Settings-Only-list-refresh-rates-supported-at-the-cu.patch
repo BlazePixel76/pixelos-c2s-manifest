@@ -1,0 +1,45 @@
+From 4b2f09014eb3114c01574ef8ae4d7f1fe98cd5df Mon Sep 17 00:00:00 2001
+From: BlazePixel76 <257001823+BlazePixel76@users.noreply.github.com>
+Date: Fri, 27 Nov 2026 19:00:00 +0300
+Subject: [PATCH] Settings: Only list refresh rates supported at the current
+ resolution
+
+RefreshRateUtils collected refresh rates from every display mode, so
+on devices where high refresh rates only exist at a lower resolution
+(e.g. 1440p@60 and 1080p@60/96/120 on c2s) the picker offered 96/120 Hz
+while running at 1440p.
+
+Filter the supported modes by the current mode's physical resolution.
+---
+ src/com/android/settings/display/RefreshRateUtils.java | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/com/android/settings/display/RefreshRateUtils.java b/src/com/android/settings/display/RefreshRateUtils.java
+index 1534fba..fb0e2ef 100644
+--- a/src/com/android/settings/display/RefreshRateUtils.java
++++ b/src/com/android/settings/display/RefreshRateUtils.java
+@@ -19,6 +19,7 @@ package com.android.settings.display;
+ import android.content.Context;
+ import android.provider.Settings;
+ import android.util.Log;
++import android.view.Display;
+ 
+ import java.util.Arrays;
+ import java.util.Collections;
+@@ -44,7 +45,12 @@ public class RefreshRateUtils {
+     }
+ 
+     List<Integer> getRefreshRates() {
+-        return Arrays.stream(mContext.getDisplay().getSupportedModes())
++        final Display display = mContext.getDisplay();
++        final Display.Mode current = display.getMode();
++        // Only offer refresh rates the panel supports at the current resolution.
++        return Arrays.stream(display.getSupportedModes())
++                .filter(m -> m.getPhysicalWidth() == current.getPhysicalWidth()
++                        && m.getPhysicalHeight() == current.getPhysicalHeight())
+                 .map(m -> Math.round(m.getRefreshRate()))
+                 .sorted().distinct().collect(Collectors.toList());
+     }
+-- 
+2.43.0
+
