@@ -87,6 +87,6 @@ The zip ends up in `out/target/product/c2s/`. On low-RAM machines use a lower `-
 
 ## License
 
-Copyright © 2026 BlazePixel76
+Copyright © 2026 BlazePixel
 
 This repo is under the [Apache License 2.0](LICENSE). Everything the manifest pulls in belongs to its authors (mainly LineageOS, PixelOS and TheMuppets) and has its own license.
