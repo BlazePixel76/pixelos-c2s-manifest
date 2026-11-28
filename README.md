@@ -1,6 +1,6 @@
-# PixelOS for Galaxy Note 20 Ultra (c2s)
+# PixelOS for Galaxy Note 20 Ultra 4G / 5G (c2s)
 
-Unofficial PixelOS (Android 17) for the Galaxy Note 20 Ultra Exynos (SM-N986B, `c2s`), based on the LineageOS 24 device tree.
+Unofficial PixelOS (Android 17) for the Galaxy Note 20 Ultra Exynos, 4G and 5G (SM-N985F / SM-N986B, `c2s`), based on the LineageOS 24 device tree.
 
 ## Downloads
 
@@ -70,6 +70,9 @@ m pixelos -j$(nproc)
 ```
 
 The zip ends up in `out/target/product/c2s/`. On low-RAM machines use a lower `-j` (like `-j6`) and zram plus swap on an SSD.
+
+### Note
+4G and 5G use the same source, so there's no separate tree for the 4G variant.
 
 ## Changes from LineageOS
 
