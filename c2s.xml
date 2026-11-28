@@ -27,4 +27,7 @@
   <project path="vendor/samsung/universal9830-common" name="proprietary_vendor_samsung_universal9830-common" remote="muppets" />
   <!-- Missing from PixelOS manifest -->
   <project path="hardware/lineage/generic-ims" name="android_hardware_lineage_generic-ims" remote="los" />
+  <!-- ImsMedia: LineageOS fork (fixes VoLTE call crash) -->
+  <remove-project name="platform/packages/modules/ImsMedia" />
+  <project path="packages/modules/ImsMedia" name="android_packages_modules_ImsMedia" remote="los" />
 </manifest>
